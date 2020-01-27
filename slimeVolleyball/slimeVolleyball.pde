@@ -1,10 +1,12 @@
 import fisica.*;
 
 PFont font;
+PImage bground, introbground, endbground, kirby, kirby2, vball, beach;
 
 color brown = #D1A443;
 color purple = #C683E8;
-color pink = #EA95C8;
+color pink = #F5B9EF;
+color green = #8FE38E;
 color lblue = #C8D2F5;
 
 FBox lwall, rwall, lfloor, rfloor, ceiling, net;
@@ -18,6 +20,20 @@ boolean akey, wkey, skey, dkey, leftkey, upkey, downkey, rightkey, leftCanJump, 
 void setup() {
   textAlign(CENTER, CENTER);
   font = createFont("ARCADECLASSIC.TTF", 10);
+  bground = loadImage("background.png");
+  bground.resize(displayWidth, displayHeight);
+  introbground = loadImage("introScreen.jpg");
+  introbground.resize(displayWidth, displayHeight);
+  endbground = loadImage("endScreen.png");
+  endbground.resize(displayWidth, displayHeight);
+  beach = loadImage("sand.jpg");
+  beach.resize(displayWidth/2, 100);
+  kirby = loadImage("kirby.png");
+  kirby.resize(100, 100);
+  kirby2 = loadImage("rkirby.png");
+  kirby2.resize(100, 100);
+  vball = loadImage("ball.png");
+  vball.resize(50, 50);
   textFont(font);
   textAlign(CENTER, CENTER);
   fullScreen(FX2D);
@@ -36,8 +52,9 @@ void setup() {
 }
 
 void draw() {
-  background(lblue);
-
+  background(bground);
+  //(0);
+  //bground(0, 0);
   if (mode == INTRO) {
     intro();
   } else if (mode == GAME) {
@@ -54,9 +71,12 @@ void draw() {
 }
 
 void intro () {
-  background(0);
+  background(introbground);
   textSize(100);
+  fill(255);
   text("CLICK TO PRESS START", width/2, height/2);
+  rpoints = 0;
+  lpoints = 0;
 }
 
 void play() {
@@ -93,12 +113,13 @@ void play() {
     }
   }
 
-
   if (rplayer.getX() <= width/2 + 50) {
-    rplayer.setPosition(width/2 + 50, rplayer.getY());
+    //rplayer.setPosition(width/2 + 50, rplayer.getY());
+    rplayer.setVelocity(-rplayer.getVelocityX(), rplayer.getVelocityY());
   }
   if (lplayer.getX() >= width/2 - 50) {
-    lplayer.setPosition(width/2 - 50, lplayer.getY());
+    //lplayer.setPosition(width/2 - 50, lplayer.getY());
+    lplayer.setVelocity(-lplayer.getVelocityX(), lplayer.getVelocityY());
   }
 
   if (lpoints == 3 || rpoints == 3) {
@@ -107,16 +128,18 @@ void play() {
 }
 
 void gameover() {
-  background(0);
+  background(endbground);
   textSize(100);
-  fill(255);
-  if (lpoints > rpoints) {
+
+  if (lpoints == 3) {
+    fill(pink);
     text("LEFT PLAYER WINS", width/2, height/2);
-  } if (lpoints < rpoints) {
+  } else {
+    fill(green);
     text("RIGHT PLAYER WINS", width/2, height/2);
   }
-  rpoints = 0;
-  lpoints = 0;
+  noStroke();
+  fill(255);
 }
 
 void makepoints() {
@@ -128,6 +151,7 @@ void makepoints() {
 
 void makeball() {
   ball = new FCircle(50);
+  ball.attachImage(vball);
   ball.setPosition(width/6, 100);
   ball.setGrabbable(false);
   ball.setNoStroke();
@@ -177,6 +201,7 @@ void makenet() {
 
 void makeleftfloor() {
   lfloor = new FBox(width/2, 100);
+  lfloor.attachImage(beach);
   lfloor.setPosition(width/4, height-50);
   lfloor.setNoStroke();
   lfloor.setStatic(true);
@@ -186,6 +211,7 @@ void makeleftfloor() {
 }
 void makerightfloor() {
   rfloor = new FBox(width/2, 100);
+  rfloor.attachImage(beach);
   rfloor.setPosition(width- width/4, height-50);
   rfloor.setNoStroke();
   rfloor.setStatic(true);
@@ -196,6 +222,7 @@ void makerightfloor() {
 
 void makeleftplayer() {  
   lplayer = new FCircle(100);
+  lplayer.attachImage(kirby);
   lplayer.setPosition(width/6, height-200);
   lplayer.setNoStroke();
   lplayer.setStatic(false);
@@ -209,6 +236,7 @@ void makeleftplayer() {
 
 void makerightplayer() {
   rplayer = new FCircle(100);
+  rplayer.attachImage(kirby2);
   rplayer.setPosition(width-width/6, height-200);
   rplayer.setNoStroke();
   rplayer.setStatic(false);
@@ -221,13 +249,15 @@ void makerightplayer() {
 }
 
 void handleKeyboard() {
-  if (wkey && leftCanJump) lplayer.addImpulse(0, -3000);
+  if (wkey && leftCanJump) lplayer.addImpulse(0, -4000);
   if (akey) lplayer.addImpulse(-150, 0);
   if (dkey) lplayer.addImpulse(150, 0);
+  if (skey && leftCanJump==false) lplayer.addImpulse(0, 4000);
 
-  if (upkey && rightCanJump) rplayer.addImpulse(0, -3000);
+  if (upkey && rightCanJump) rplayer.addImpulse(0, -4000);
   if (leftkey) rplayer.addImpulse(-150, 0);
   if (rightkey) rplayer.addImpulse(150, 0);
+  if (downkey && rightCanJump==false) rplayer.addImpulse(0, 4000);
 }
 
 void keyPressed() {
@@ -255,6 +285,7 @@ void keyReleased() {
 void mouseReleased() {
   if (mode == INTRO) {
     mode = GAME;
+    setup();
   } else if (mode == END) {
     mode = INTRO;
   }
